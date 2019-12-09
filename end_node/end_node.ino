@@ -50,7 +50,7 @@ String serverHost = "http://192.168.4.1/feed";
 String data;
 
 // DEEP_SLEEP Timeout interval
-int sleepInterval = .5;
+int sleepInterval = 1;
 
 // DEEP_SLEEP Timeout interval when connecting to AP fails
 int failConnectRetryInterval = 2;
@@ -98,10 +98,6 @@ void loop(){
   readBMPSensor();
   processData();
   printData();
-
-  if(WiFi.status() != WL_CONNECTED){
-    connectWIFI();
-  }
   
   Serial.println("- build DATA stream string");
   buildDataStream();
@@ -109,8 +105,12 @@ void loop(){
   Serial.println("- send POST request");
   sendHttpRequest();
 
-  delay(10000);
+  delay(20000);
+  WiFi.disconnect();
+  delay(2000);
+  connectWIFI();
 //  hibernate(sleepInterval);
+  
 }
 
 void connectWIFI(){
@@ -123,7 +123,7 @@ void connectWIFI(){
   while (WiFi.status() != WL_CONNECTED) {
     if(counter > 20){
        Serial.println("- can't connect, going to sleep");    
-       hibernate(failConnectRetryInterval);
+//       hibernate(failConnectRetryInterval);
     }
     delay(500);
     Serial.print(".");
@@ -176,7 +176,7 @@ void printData(){
 void processData(){
   temperature = (t+temp)/2;
 
-  if( Ax>1.3 || Ax<.7 || Ay>-.1 || Ay<-.7 || Az>-.7 || Az<-103 ){
+  if( Ax>1.3 || Ax<.7 || Ay>-.1 || Ay<-.7 || Az>-.7 || Az<-1.3 ){
     st="Not Stable";
   }else{
     st="Stable";
